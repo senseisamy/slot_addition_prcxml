@@ -61,7 +61,7 @@ fn generate_prcxml(mods_directory: &Path, fighter_max_slot: &mut HashMap<String,
 fn print_fighters_max_slot(fighter_max_slot: &HashMap<String, u8>) {
     println!("Here is each fighter affected with their new maximum slot:");
     for (fighter, max) in fighter_max_slot {
-        println!(" {fighter} - c{max:0>2}")
+        println!(" {fighter} - c{:0>2}", max - 1)
     }
     println!()
 }
