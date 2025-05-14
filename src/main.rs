@@ -59,9 +59,12 @@ fn generate_prcxml(mods_directory: &Path, fighter_max_slot: &mut HashMap<String,
 }
 
 fn print_fighters_max_slot(fighter_max_slot: &HashMap<String, u8>) {
+    let mut sorted_entries: Vec<_> = fighter_max_slot.iter().collect();
+    sorted_entries.sort_by(|a, b| a.0.cmp(b.0));
+
     println!("Here is each fighter affected with their new maximum slot:");
-    for (fighter, max) in fighter_max_slot {
-        println!(" {fighter} - c{:0>2}", max - 1)
+    for (fighter, max) in sorted_entries.iter() {
+        println!(" {fighter} - c{:0>2}", *max - 1)
     }
     println!()
 }
@@ -84,14 +87,16 @@ fn figher_check_max(
     mods_directory: &Path,
     fighter_max_slot: &mut HashMap<String, u8>,
 ) -> Result<()> {
+    // iterate through every fighter in the mod directory
     for entry in fs::read_dir(mods_directory)? {
         let path = entry?.path();
         if path.is_dir() {
             let fighter = path.file_name().unwrap().to_str().unwrap().to_string();
-            let body = path.join("model/body");
-            let diver = path.join("model/diver");
-            if body.exists() || diver.exists() {
-                let path = if body.exists() { body } else { diver };
+            let model = path.join("model");
+            if !model.exists() { continue }
+            // iterate through every directory for this fighter and look for directories like 'cXX' where X is a number
+            for entry in fs::read_dir(path.join("model"))? {
+                let path = entry?.path();
                 for entry in fs::read_dir(path)? {
                     let path = entry?.path();
                     if path.is_dir() && path.file_name().unwrap().to_str().unwrap().starts_with("c")
